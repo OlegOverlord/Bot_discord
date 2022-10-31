@@ -9,7 +9,7 @@ const { createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const { createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
 
 var express = require('express');
-var app     = express();
+var app = express();
 
 app.set('port', (process.env.PORT || 10804));
 
@@ -69,7 +69,8 @@ client.on("messageCreate", async function(message)
         case "list":
             var n = 1;
             var list = "Доступные аргументы к команде pistoletov:\n";
-            fs.readdirSync("./resources/").forEach(file => {
+            fs.readdirSync("./resources/").forEach(file => 
+            {
                 var name = file.split('.');
                 list += n + ". " + name[0] + "\n";
                 n++;
@@ -83,27 +84,42 @@ client.on("messageCreate", async function(message)
                 query += " " + args.shift();
             if (query.length > 0)
                 query = query.slice(1);
-            var result = await searchYoutube(config.api_key, 
-                {   
-                    q: query,
-                    part: 'snippet',
-                    type: 'video',
-                    maxResults: 1 
-                });
-            var url = "https://www.youtube.com/watch?v=" + result.items[0].id.videoId;
-            console.log(url);
+            var res = await searchYoutube(config.api_key, 
+            {   
+                q: query,
+                part: 'snippet',
+                type: 'video',
+                maxResults: 1 
+            });
+            var url = "https://www.youtube.com/watch?v=" + res.items[0].id.videoId;
             if (ytdl.validateURL(url))
             {
                 message.channel.send("По запросу \'" + query + "\' найдено: " + url);
-                url = ytdl(url, { 
-                    filter: 'audioonly', 
-                    quality: 'highestaudio',
-                    highWaterMark: 1 << 25 });
+                var options;
+                if (res.items[0].snippet.liveBroadcastContent != 'live')
+                {
+                    options = 
+                    {
+                        filter: 'audioonly', 
+                        quality: 'highestaudio',
+                        highWaterMark: 1 << 25 
+                    };
+                }
+                else
+                {
+                    options = 
+                    {
+                        liveBuffer: 4900,
+                        highWaterMark: 1 << 25 
+                    };
+                }    
+                url = ytdl(url, options);
             }
             var player = createAudioPlayer({
-                behaviors: {
+                behaviors: 
+                {
                     noSubscriber: NoSubscriberBehavior.Pause,
-                },
+                }
             });
             var connection = joinVoiceChannel(
             {
@@ -112,13 +128,16 @@ client.on("messageCreate", async function(message)
                 adapterCreator: message.guild.voiceAdapterCreator
             });
             connection.subscribe(player);
-            var resource = createAudioResource(url, {
-                metadata: {
+            var resource = createAudioResource(url, 
+            {
+                metadata: 
+                {
                     title: "play",
-                },
+                }
             });
             player.play(resource);
-            player.on('error', error => {
+            player.on('error', error => 
+            {
                 message.channel.send("Плеер упал, а я нет!");
                 console.log(url);
             });
@@ -127,10 +146,12 @@ client.on("messageCreate", async function(message)
         case "pistoletov":
             var name = "./resources/" + args.shift() + ".mp3";
             message.channel.send(name);
-            var player = createAudioPlayer({
-                behaviors: {
+            var player = createAudioPlayer(
+            {
+                behaviors: 
+                {
                     noSubscriber: NoSubscriberBehavior.Pause,
-                },
+                }
             });
             var connection = joinVoiceChannel(
             {
@@ -139,10 +160,12 @@ client.on("messageCreate", async function(message)
                 adapterCreator: message.guild.voiceAdapterCreator
             });
             connection.subscribe(player);
-            var resource = createAudioResource(name, {
-                metadata: {
+            var resource = createAudioResource(name, 
+            {
+                metadata: 
+                {
                     title: "Pistoletov",
-                },
+                }
             });
             player.play(resource);
             break;
