@@ -4,9 +4,11 @@ const ytdl = require('ytdl-core');
 const searchYoutube = require('youtube-api-v3-search');
 
 const { Client, GatewayIntentBits } = require('discord.js');
-const { joinVoiceChannel, VoiceConnectionStatus, entersState } = require('@discordjs/voice');
+const { joinVoiceChannel, VoiceConnectionStatus } = require('@discordjs/voice');
 const { createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const { createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
+
+const config = require("./config.json");
 
 const client = new Client(
 {
@@ -15,10 +17,7 @@ const client = new Client(
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildVoiceStates, ]
-})
-
-const config = require("./config.json");
-const { url } = require('inspector');
+});
 
 var prefix = ">";
 
@@ -52,6 +51,7 @@ client.on("messageCreate", async function(message)
                 guildId: message.guild.id,
                 adapterCreator: message.guild.voiceAdapterCreator
             });
+            //console.log(connection);
             break;
 
         case "list":
