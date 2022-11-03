@@ -4,8 +4,10 @@ const express = require('express');
 
 const config = require("./config.json");
 
-const { command_play } = require("./commands/play.js");
+const { command_play, player_init, command_queue } = require("./commands/player_module.js");
 const { command_prefix } = require("./commands/prefix.js");
+const { command_join } = require("./commands/join.js");
+const { command_members } = require("./commands/members.js");
 
 const client = new Client(
 {
@@ -17,6 +19,8 @@ const client = new Client(
         GatewayIntentBits.GuildVoiceStates, 
     ]
 });
+
+player_init();
 
 client.on("messageCreate", function(message) 
 {
@@ -41,17 +45,19 @@ client.on("messageCreate", function(message)
             break;
 
         case "join":
-            var connection = joinVoiceChannel(
-            {
-                channelId: message.member.voice.channelId,
-                guildId: message.guild.id,
-                adapterCreator: message.guild.voiceAdapterCreator
-            });
-            //console.log(connection);
+            command_join(message);
+            break;
+
+        case "members":
+            command_members(message);
             break;
 
         case "play":
             command_play(message, args);
+            break;
+
+        case "queue":
+            command_queue(message);
             break;
     }
 });
