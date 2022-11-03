@@ -61,7 +61,6 @@ async function queue_shift()
         };
     }    
 
-    console.log(options);
     var stream = ytdl(url, options);
     var resource = createAudioResource(stream, 
     {
