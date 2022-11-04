@@ -45,6 +45,7 @@ async function queue_shift()
         return;
     }
 
+    var frames = 5;
     var options = 
     {
         filter: 'audioonly', 
@@ -53,17 +54,20 @@ async function queue_shift()
     };
     if (is_live)
     {
+        frames = 30;
         options = 
         {
             liveBuffer: 4900,
             quality: 'lowestaudio',
-            highWaterMark: 1 << 30,
+            highWaterMark: 1 << 25
         };
     }    
 
+    console.log(options);
     var stream = ytdl(url, options);
     var resource = createAudioResource(stream, 
     {
+        silencePaddingFrames: frames,
         metadata: 
         {
             title: query,
@@ -91,8 +95,9 @@ function player_init()
     });
     player.on('error', error => 
     {
-        console.log(error);
-        songsQueue.shift();
+        console.log(error.message);
+        if (error.message != "read ECONNRESET")
+            songsQueue.shift();
         queue_shift();
     });
 }
