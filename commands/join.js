@@ -1,11 +1,14 @@
 const { joinVoiceChannel } = require('@discordjs/voice');
-const { alone_in_voice } = require('./members.js');
+const { alone_in_voice, same_voice } = require('./members.js');
 
 function command_join(message)
 {
     if (!alone_in_voice(message))
     {
-        message.channel.send("Иди нахуй");
+        if (!same_voice(message))
+            message.channel.send("Иди нахуй");
+        else
+            message.channel.send("Долбаёб, я тут");
         return;
     }
     joinVoiceChannel(

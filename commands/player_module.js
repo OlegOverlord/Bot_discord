@@ -50,20 +50,33 @@ async function queue_shift()
     {
         filter: 'audioonly', 
         quality: 'highestaudio',
-        highWaterMark: 1 << 25 
+        highWaterMark: 1 << 25,
+        requestOptions: 
+        {
+            headers: 
+            {
+                Cookie: config.coockie
+            }
+        }
     };
     if (is_live)
     {
-        frames = 30;
+        frames = 100;
         options = 
         {
             liveBuffer: 4900,
             quality: 'lowestaudio',
-            highWaterMark: 1 << 25
+            highWaterMark: 1 << 25,
+            requestOptions: 
+            {
+                headers: 
+                {
+                    Cookie: config.coockie
+                }
+            }
         };
     }    
 
-    console.log(options);
     var stream = ytdl(url, options);
     var resource = createAudioResource(stream, 
     {
@@ -96,15 +109,13 @@ function player_init()
     player.on('error', error => 
     {
         console.log(error.message);
-        if (error.message != "read ECONNRESET")
-            songsQueue.shift();
         queue_shift();
     });
 }
 
 async function command_play(message, args)
 {
-    if (alone_in_voice(message) || (songsQueue.length == 0))
+    if (alone_in_voice(message))
     {
         connection = joinVoiceChannel(
         {
@@ -124,6 +135,8 @@ async function command_play(message, args)
     {
         var query = await prepare_args(args);
         songsQueue.push(query);
+        if (songsQueue.length === 0)
+            queue_shift();
         message.channel.send(query[0] +  " => " + query[1]);
     }
 }
@@ -136,6 +149,19 @@ async function command_queue(message)
     message.channel.send(msg);
 }
 
+async function command_skip(message)
+{
+    if (songsQueue.length === 0)
+    {
+        message.channel.send("Очередь и так пуста, что ты, блять, пропускать собрался?");
+        return;
+    }
+    var skipped = songsQueue.shift();
+    message.channel.send("Пропускаю " + skipped[1]);
+    queue_shift();
+}
+
+module.exports.command_skip = command_skip;
 module.exports.command_queue = command_queue;
 module.exports.command_play = command_play;
 module.exports.player_init = player_init;

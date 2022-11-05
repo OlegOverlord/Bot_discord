@@ -1,13 +1,11 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-
 const express = require('express');
 
 const config = require("./config.json");
 
-const { command_play, player_init, command_queue } = require("./commands/player_module.js");
-const { command_prefix } = require("./commands/prefix.js");
-const { command_join } = require("./commands/join.js");
-const { command_members } = require("./commands/members.js");
+const { player_init } = require("./commands/player_module.js");
+const { command_recognize } = require("./commands/recognition_module.js");
+const { perform_command } = require("./analyzer.js");
 
 const client = new Client(
 {
@@ -22,7 +20,7 @@ const client = new Client(
 
 player_init();
 
-client.on("messageCreate", function(message) 
+client.on("messageCreate", (message) =>
 {
     if (!message.content.startsWith(config.prefix)) return;
 
@@ -33,43 +31,21 @@ client.on("messageCreate", function(message)
     while (command.length == 0 && args.length > 0)
         command = args.shift();
 
-    switch (command)
-    {
-        case "sum":
-            var res = Number(args.shift()) + Number(args.shift());
-            message.channel.send(res.toString());
-            break;
-
-        case "prefix":
-            command_prefix(message, args);
-            break;
-
-        case "join":
-            command_join(message);
-            break;
-
-        case "members":
-            command_members(message);
-            break;
-
-        case "play":
-            command_play(message, args);
-            break;
-
-        case "queue":
-            command_queue(message);
-            break;
-    }
+    perform_command(message, command, args);
+    if (command == "recognize")
+        command_recognize(message);
 });
 
 var app = express();
 
 app.set('port', (process.env.PORT || 10804));
 
-app.get('/', function(request, response) {
+app.get('/', (request, response) => 
+{
     var result = 'App is running'
     response.send(result);
-}).listen(app.get('port'), function() {
+}).listen(app.get('port'), () => 
+{
     console.log('App is running, server is listening on port ', app.get('port'));
 });
 

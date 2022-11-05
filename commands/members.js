@@ -1,3 +1,5 @@
+const { getVoiceConnection } = require('@discordjs/voice');
+
 function command_members(message)
 {
     var bot = message.guild.members.me;
@@ -19,14 +21,18 @@ function command_members(message)
 
 function alone_in_voice(message)
 {
+    var connection = getVoiceConnection(message.guild.id);
     var bot = message.guild.members.me;
-    if (bot.voice.channel === null)
+    if (bot.voice.channel === null || !connection)
         return true;
     return !(bot.voice.channel.members.size > 1);
 }
 
 function same_voice(message)
 {
+    var connection = getVoiceConnection(message.guild.id);
+    if (!connection)
+        return false;
     var bot = message.guild.members.me;
     var user = message.member;
     return (bot.voice.channelId == user.voice.channelId);
