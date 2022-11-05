@@ -19,7 +19,7 @@ function command_equal(message, args)
             var equal = args.shift();
             if (!orig || !equal)
             {
-                message.channel.send("Где продолжение? Для совсем идиотов пример: \'>equal set play сыграй\'");
+                message.channel.send("Где продолжение? Для совсем идиотов пример: \'" + config.prefix + "equal set play сыграй\'");
                 break;
             }
             config.recognition[orig] = equal;
