@@ -27,7 +27,7 @@ async function command_recognize(message)
     {
         var elem = listen.get(message.member.id)
         clear_recognize(elem[0], elem[1], elem[2], elem[3], elem[4], elem[5], elem[6]);
-        message.channel.send("Прекратил слушать" + message.member.toString());
+        message.channel.send("Прекратил слушать " + message.member.toString());
         return;
     }
     
@@ -75,7 +75,7 @@ async function command_recognize(message)
         if (same_voice(message))
             return;
         clear_recognize(audio, rec, connection, message, onData, onEnd, onVoiceStateUpdate);
-        message.channel.send("Прекратил слушать" + message.member.toString());
+        message.channel.send("Прекратил слушать " + message.member.toString());
     }
 
     var audio = connection.receiver.subscribe(message.member.id);

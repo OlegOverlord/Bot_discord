@@ -32,7 +32,10 @@ async function prepare_args(args)
 async function queue_shift()
 {
     if (songsQueue.length == 0)
+    {
+        player.stop();
         return;
+    }
     var q = songsQueue[0];
     var query = q[0];
     var url = q[1];
@@ -100,7 +103,7 @@ function player_init()
     });
     player.addListener("stateChange", (oldOne, newOne) => 
     {
-        if (newOne.status == "idle")
+        if (newOne.status == "idle" && oldOne != newOne)
         {
             songsQueue.shift();
             queue_shift();
@@ -135,7 +138,7 @@ async function command_play(message, args)
     {
         var query = await prepare_args(args);
         songsQueue.push(query);
-        if (songsQueue.length === 0)
+        if (songsQueue.length === 1)
             queue_shift();
         message.channel.send(query[0] +  " => " + query[1]);
     }
