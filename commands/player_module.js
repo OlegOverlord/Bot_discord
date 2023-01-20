@@ -1,7 +1,7 @@
 const config = require("../config.json");
 const ytdl = require("ytdl-core");
 const searchYoutube = require('youtube-api-v3-search');
-const { joinVoiceChannel, VoiceConnectionStatus } = require('@discordjs/voice');
+const { getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus } = require('@discordjs/voice');
 const { createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const { createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
 const { alone_in_voice, same_voice } = require('./members.js');
@@ -24,9 +24,11 @@ async function prepare_args(args)
         type: 'video',
         maxResults: 1 
     });
+    if (res.items.length == 0)
+        return null;
     var url = "https://www.youtube.com/watch?v=" + res.items[0].id.videoId;
     var is_live = res.items[0].snippet.liveBroadcastContent == 'live';
-    return [ query, url, is_live ];
+    return [query, url, is_live];
 }
 
 async function queue_shift()
@@ -89,6 +91,7 @@ async function queue_shift()
             title: query,
         }
     });
+    console.log("Play");
     player.play(resource);
 }
 
@@ -128,19 +131,35 @@ async function command_play(message, args)
         });
         songsQueue = [];
         var query = await prepare_args(args);
-        songsQueue.push(query);
-        message.channel.send(query[0] +  " => " + query[1]);
-        connection.subscribe(player);
-        queue_shift();
+        if (query == null)
+            message.channel.send("Блять, нихуя не нашёл в ютубе");
+        else
+        {
+            songsQueue.push(query);
+            message.channel.send(query[0] +  " => " + query[1]);
+            connection.subscribe(player);
+            queue_shift();
+        }
         return;
     }
     if (same_voice(message))
     {
+        var cur_connection = getVoiceConnection(message.guild.id);
+        if (connection != cur_connection)
+        {
+            connection = cur_connection;
+            connection.subscribe(player);
+        }
         var query = await prepare_args(args);
-        songsQueue.push(query);
-        if (songsQueue.length === 1)
-            queue_shift();
-        message.channel.send(query[0] +  " => " + query[1]);
+        if (query == null)
+            message.channel.send("Блять, нихуя не нашёл в ютубе");
+        else
+        {
+            songsQueue.push(query);
+            if (songsQueue.length === 1)
+                queue_shift();
+            message.channel.send(query[0] +  " => " + query[1]);
+        }
     }
 }
 

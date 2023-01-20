@@ -7,7 +7,7 @@ const encoder = new OpusEncoder(48000, 1);
 
 const config = require("../config.json");
 const { same_voice } = require('./members.js');
-const { perform_command } = require("../analyzer.js");
+const { perform_command } = require("../scripts/analyzer.js");
 
 var listen = new Map();
 
@@ -21,8 +21,14 @@ function clear_recognize(audio, rec, connection, message, onData, onEnd, onVoice
     listen.delete(message.member.id);
 }
 
-async function command_recognize(message)
+async function command_recognize(client, message)
 {
+    if (!same_voice(message))
+    {
+        message.channel.send("И как я тебя услышу?");
+        return;
+    }
+
     if (listen.has(message.member.id))
     {
         var elem = listen.get(message.member.id)
@@ -65,7 +71,7 @@ async function command_recognize(message)
                     break;
                 }
             }
-            perform_command(message, command, args);
+            perform_command(client, message, command, args);
         }
         rec.reset();
     }

@@ -14,6 +14,7 @@ function command_equal(message, args)
             }
             message.channel.send(msg);
             break;
+
         case "set":
             var orig = args.shift();
             var equal = args.shift();
@@ -25,6 +26,7 @@ function command_equal(message, args)
             config.recognition[orig] = equal;
             message.channel.send("Установлено: " + orig + " = \'" + config.recognition[orig] + "\'");
             break;
+            
         default:
             console.log(config.vprefix);
             message.channel.send("Ахуеть, какой же ты тупой. Используй эту комманду с аргументами set... или list");
